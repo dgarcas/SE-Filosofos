@@ -1,0 +1,16 @@
+= Práctica de los filosfos de Sistemas Empotrados
+
+== Simulador UART
+Con el propósito de poder ejecutar esta práctica sin el microcontrolador, se puede simular la ejecución del mismo. Un aspecto importante a configurar del simulador es la UART, puesto que no es tan sencillo. Para habilitar esta se debe hacer los siguiente:
+
+    . Enable the UART:
+        .. Right click on your project and select “Properties”.
+        .Click on the “Simulator” category and select the option category “Uart1 IO Options”.
+    1.3.Check “Enable Uart1 IO”.
+    1.4.For “Output”, select “Window”.
+    1.5.Click Apply.
+
+2.Select Window>Simulator>Stimulus.
+3.Click the “Register Injection” tab.
+4.Under “Reg/Var”, select the UART receive register (e.g., RCREG or RXBUF), depending on your device.
+5.Under “Trigger, select “Message”.
