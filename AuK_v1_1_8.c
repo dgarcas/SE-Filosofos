@@ -786,16 +786,83 @@ void unblock(int task_id)
 /*******************************************************/
 /*******************************************************/
 /*******************************************************/
+
+// Array que representa los tenedores de los filósofos.
+// 0 -> tenedor libre (sin usar)
+// 1 -> tenedor ocupado (usado))
+int tenedores[] = {0,0,0,0,0};
 Tsemaphore sem;
+
 void proceso(void)
 {
-    int id = give_me_my_id();
-    
     while(1)
     {
-        wait(&sem);
-        printf("\r\nSoy proceso %d", id);
-        signal(&sem);
+        meditar();
+        comer();
+        dormir();
+    }
+}
+
+
+void meditar(void)
+{
+    int id = give_me_my_id();
+    wait(&sem);
+    printf("\r\nMeditando %d", id);
+    signal(&sem);
+    
+}
+
+void comer(void)
+{
+    int id = give_me_my_id();
+    wait(&sem);
+    cogerTenedor();
+    printf("\r\nComiendo %d", id);
+    soltarTenedor();
+    signal(&sem);
+}
+
+void dormir(void)
+{
+    int id = give_me_my_id();
+    wait(&sem);
+    printf("\r\nDurmiendo %d", id);
+    signal(&sem);
+}
+
+
+void cogerTenedor(void)
+{
+    int tenedorA = give_me_my_id();
+    int tenedorB = getIdTenedorB (); 
+    
+
+    if (tenedores[tenedorA] == 0 && tenedores[tenedorB] == 0){
+        tenedores[tenedorA] = 1; 
+        tenedores[tenedorB] = 1; 
+    }
+    
+}
+
+int getIdTenedorB(void){
+    int myId = give_me_my_id();
+    int tenedorId;
+    if(myId == 4){
+        tenedorId = 0;
+    }else {
+        tenedorId = myId + 1;
+    }
+}
+
+void soltarTenedor(void)
+{
+    int tenedorA = give_me_my_id();
+    int tenedorB = getIdTenedorB (); 
+    
+    if (tenedores[tenedorA] == 1 && tenedores[tenedorB] == 1){
+        tenedores[tenedorA] = 0; 
+        tenedores[tenedorB] = 0; 
     }
 }
 
@@ -809,7 +876,7 @@ int main(void)
     
     init_semaphore(&sem, 1);
             
-    for(int i=0; i<2; i++) 
+    for(int i=0; i<5; i++) 
     {
         create_task(__builtin_tblpage(proceso),
                 __builtin_tbloffset(proceso),300,1);
