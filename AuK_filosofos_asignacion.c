@@ -62,6 +62,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include "AuK_v1_1_8.h"
+#include <string.h>
 
 /*-----------------------------------------------------------------
  AuK variables and routines
@@ -793,58 +794,6 @@ void unblock(int task_id)
 int tenedores[] = {0,0,0,0,0};
 Tsemaphore sem;
 
-void proceso(void)
-{
-    while(1)
-    {
-        meditar();
-        comer();
-        dormir();
-    }
-}
-
-
-void meditar(void)
-{
-    int id = give_me_my_id();
-    wait(&sem);
-    printf("\r\nMeditando %d", id);
-    signal(&sem);
-    
-}
-
-void comer(void)
-{
-    int id = give_me_my_id();
-    wait(&sem);
-    cogerTenedor();
-    printf("\r\nComiendo %d", id);
-    soltarTenedor();
-    signal(&sem);
-}
-
-void dormir(void)
-{
-    int id = give_me_my_id();
-    wait(&sem);
-    printf("\r\nDurmiendo %d", id);
-    signal(&sem);
-}
-
-
-void cogerTenedor(void)
-{
-    int tenedorA = give_me_my_id();
-    int tenedorB = getIdTenedorB (); 
-    
-
-    if (tenedores[tenedorA] == 0 && tenedores[tenedorB] == 0){
-        tenedores[tenedorA] = 1; 
-        tenedores[tenedorB] = 1; 
-    }
-    
-}
-
 int getIdTenedorB(void){
     int myId = give_me_my_id();
     int tenedorId;
@@ -853,6 +802,24 @@ int getIdTenedorB(void){
     }else {
         tenedorId = myId + 1;
     }
+    return tenedorId;
+}
+
+void cogerTenedor(void){
+    
+    int tenedorA = give_me_my_id();
+    int tenedorB = getIdTenedorB();
+    int endWhile = 1;
+        
+    while(endWhile == 1){
+        wait(&sem);
+        if (tenedores[tenedorA] == 0 && tenedores[tenedorB] == 0){
+            tenedores[tenedorA] = 1; 
+            tenedores[tenedorB] = 1;
+            endWhile = 0;
+        }
+        signal(&sem);
+    }
 }
 
 void soltarTenedor(void)
@@ -860,9 +827,34 @@ void soltarTenedor(void)
     int tenedorA = give_me_my_id();
     int tenedorB = getIdTenedorB (); 
     
+    wait(&sem);
+    printf("\r\nComiendo %d", tenedorA);
     if (tenedores[tenedorA] == 1 && tenedores[tenedorB] == 1){
         tenedores[tenedorA] = 0; 
         tenedores[tenedorB] = 0; 
+    }
+    signal(&sem);
+}
+
+void printMessage(char mensaje[]){
+    int id = give_me_my_id();
+    wait(&sem);
+    printf("\r\n%s %d", mensaje ,id);
+    signal(&sem);
+}
+
+void comer(void){   
+    cogerTenedor(); 
+    soltarTenedor();
+}
+
+void proceso(void)
+{
+    while(1)
+    {
+        printMessage("Meditando");
+        comer();
+        printMessage("Durmiendo");
     }
 }
 
@@ -872,7 +864,7 @@ int main(void)
     init_ports();
     init_uart();
     
-    int x = init_AuK(39.6288E+6,0.01);
+    init_AuK(39.6288E+6,0.01);
     
     init_semaphore(&sem, 1);
             

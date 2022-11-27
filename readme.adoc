@@ -1,16 +1,43 @@
-= Práctica de los filosfos de Sistemas Empotrados
+:imagesdir: ./imagenes
 
-== Simulador UART
-Con el propósito de poder ejecutar esta práctica sin el microcontrolador, se puede simular la ejecución del mismo. Un aspecto importante a configurar del simulador es la UART, puesto que no es tan sencillo. Para habilitar esta se debe hacer los siguiente:
+:doctype: book
+:toc:    
+:toclevels: 4
+:icons: font
+:url-quickref: https://docs.asciidoctor.org/asciidoc/latest/syntax-quick-reference/
+:title-logo-image: imagenes/upm_logo.png
 
-    . Enable the UART:
-        .. Right click on your project and select “Properties”.
-        .Click on the “Simulator” category and select the option category “Uart1 IO Options”.
-    1.3.Check “Enable Uart1 IO”.
-    1.4.For “Output”, select “Window”.
-    1.5.Click Apply.
+= Práctica problema de los filosfos de Sistemas Empotrados
+Luis Triana; Juan Arquero; David García
 
-2.Select Window>Simulator>Stimulus.
-3.Click the “Register Injection” tab.
-4.Under “Reg/Var”, select the UART receive register (e.g., RCREG or RXBUF), depending on your device.
-5.Under “Trigger, select “Message”.
+=== Asignación total 
+
+Para solucionar el problema de los filósofos con *asignación total*, se ha optado por la utilización de un *único semáforo* cuyo contador solo administrará el acceso a un proceso. 
+Dicho semáforo controla tanto el acceso a la USART, para que cada filósofo pueda imprimir su tarea sin interbloquear a otros, como el acceso a la tenedores.
+
+Dado que cada tenedor es un recurso que solo puede ser usado por un proceso a la vez, el semáforo también gestiona el acceso a un array de enteros compartido de 5 elementos que representa el estado de los tenedores (0 == tenedor libre; 1 == tenedor en uso). El estado de los tenedores solo cambiará durante la tarea denominada comer, donde cada proceso accederá al array en exclusión mutua, cuando el semaforo le de acceso. 
+
+Los tenedores pasarán de estar libres a estar ocupados, cuando ambos estén libres, sino el proceso quedará en espera activa hasta que sus tenedores estén libres. Para liberar los tenedores se hará después de imprimir el mensaje que indica que están comiendo, por tanto el acceso a los recursos tanto para imprimir el estado de comer y modificar el estado a liberado de los tenedores es el mismo.
+
+==== Inanición
+
+La inanición no tien lugar, dado que solo se usa un semáforo, de esta forma los procesos quedan en una cola de entrada de orden FIFO.
+
+==== Interbloqueo
+
+El interbloqueo se resuelve, puesto que tan solo un proceso a la vez puede acceder a los recursos y hasta que este no los libere ningún otro podrá tomar el contro de los recursos (array de tenedores y acceso a la USART).
+
+=== Asignación jerárquica
+
+Para aplicar esta solución, se utiliza un total de 6 semáforos, los 5 primeros representan los tenedores y el último el acceso a la USART. Los 6 semáforos se almacenan dentro de un único array, donde la posición dentro del mismo representa el nivel jerarquico de cada recurso. 
+
+Las tareas de meditar y dormir hacen uso del semaforo con índice 5 para acceder a la USART, la tarea de comer hace uso de todos los semaforos del array. Cuando un filosofo va a comer, debe invocar la función wait del tenedor con menor índice en primer lugar, y posteriormente el de mayor prioridad. 
+
+Una vez se le haya concedido acceso a los dos semáforos, el filósofo accederá al semaforo de mayor índice, que representa la USART, para poder imprimir sin interbloqueos, posteriormente liberará todos los semáforos.
+
+==== Inanición
+
+Con esta solución la inanición no es un problema, puesto que los recursos se asignan a un solo proceso a la vez, y quienes lo soliciten posteriormente quedan registrados en una cola FIFO.  
+
+==== Interbloqueo
+Para evitar el interbloqueo se debe asignar prioridades a los recursos, y estos deben se accedidos de menor a mayor prioridad según se necesiten. De esta forma se asegura que ningún proceso quede a la espera de un mismo recurso de manera que se forme un interbloqueo.
