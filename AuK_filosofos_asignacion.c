@@ -510,7 +510,7 @@ void start_AuK(void)
    any circumstance) the bit 0 of file register pointed by the first 
    parameter.
     
-   ¡¡¡ATTENTION!!!
+   ã€€î“‡TTENTION!!!
    TEST and SET operation is executed in only one instruction cycle.
    Therefore, it is uninterrumpible, hence it is impossible for race
    conditions to appear in relation to the bit in which TEST and SET 
@@ -750,7 +750,7 @@ void delay_until(unsigned long tic)
 /*******************************************************/
 /*******************************************************/
 /*******************************************************/
-/* ¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡¡ ATTENTION !!!!!!!!!!!!!!!!!!!!!!! */
+/* ã€€ã€€ã€€ã€€ã€€ã€€ã€€ã€€ ATTENTION !!!!!!!!!!!!!!!!!!!!!!! */
 
 /* This set of routines is provided to facilitate the development 
  * of more abstract tools than those currently provided in the microkernel, 
@@ -787,7 +787,7 @@ void unblock(int task_id)
 /*******************************************************/
 /*******************************************************/
 
-// Array que representa los tenedores de los filósofos.
+// Array que representa los tenedores de los filé«Žofos.
 // 0 -> tenedor libre (sin usar)
 // 1 -> tenedor ocupado (usado))
 int tenedores[] = {0,0,0,0,0};
@@ -886,4 +886,3 @@ int main(void)
     Sleep();
     return(0);
 }
- 
