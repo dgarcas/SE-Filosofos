@@ -790,8 +790,7 @@ void unblock(int task_id)
 // Array que representa los tenedores de los filósofos.
 // 0 -> tenedor libre (sin usar)
 // 1 -> tenedor ocupado (usado))
-int tenedores[] = {0,0,0,0,0};
-Tsemaphore sem;
+Tsemaphore semaforos [6];
 
 void proceso(void)
 {
@@ -807,28 +806,34 @@ void proceso(void)
 void meditar(void)
 {
     int id = give_me_my_id();
-    wait(&sem);
+    
+    wait(&semaforos[5]);
     printf("\r\nMeditando %d", id);
-    signal(&sem);
+    signal(&semaforos[5]);
     
 }
 
 void comer(void)
 {
     int id = give_me_my_id();
-    wait(&sem);
+    
     cogerTenedor();
+    
+    wait(&semaforos[5]);
     printf("\r\nComiendo %d", id);
+    signal(&semaforos[5]);
+    
     soltarTenedor();
-    signal(&sem);
+    
 }
 
 void dormir(void)
 {
     int id = give_me_my_id();
-    wait(&sem);
+    
+    wait(&semaforos[5]);
     printf("\r\nDurmiendo %d", id);
-    signal(&sem);
+    signal(&semaforos[5]);
 }
 
 
@@ -838,9 +843,12 @@ void cogerTenedor(void)
     int tenedorB = getIdTenedorB (); 
     
 
-    if (tenedores[tenedorA] == 0 && tenedores[tenedorB] == 0){
-        tenedores[tenedorA] = 1; 
-        tenedores[tenedorB] = 1; 
+    if (tenedorA < tenedorB){
+        wait(&semaforos[tenedorA]);
+        wait(&semaforos[tenedorB]);
+    }else{
+        wait(&semaforos[tenedorB]);
+        wait(&semaforos[tenedorA]);
     }
     
 }
@@ -853,6 +861,8 @@ int getIdTenedorB(void){
     }else {
         tenedorId = myId + 1;
     }
+    
+    return tenedorId;
 }
 
 void soltarTenedor(void)
@@ -860,9 +870,18 @@ void soltarTenedor(void)
     int tenedorA = give_me_my_id();
     int tenedorB = getIdTenedorB (); 
     
-    if (tenedores[tenedorA] == 1 && tenedores[tenedorB] == 1){
-        tenedores[tenedorA] = 0; 
-        tenedores[tenedorB] = 0; 
+        if (tenedorA < tenedorB){
+        signal(&semaforos[tenedorA]);
+        signal(&semaforos[tenedorB]);
+    }else{
+        signal(&semaforos[tenedorB]);
+        signal(&semaforos[tenedorA]);
+    }
+}
+
+void inizializarSemaforos(void){
+    for(int i=0; i<6; i++){ 
+        init_semaphore(&semaforos[i],1);
     }
 }
 
@@ -872,9 +891,9 @@ int main(void)
     init_ports();
     init_uart();
     
-    int x = init_AuK(39.6288E+6,0.01);
+    init_AuK(39.6288E+6,0.01);
     
-    init_semaphore(&sem, 1);
+    inizializarSemaforos();
             
     for(int i=0; i<5; i++) 
     {
@@ -887,3 +906,4 @@ int main(void)
     return(0);
 }
  
+
