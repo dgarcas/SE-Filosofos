@@ -12,13 +12,20 @@ Luis Triana; Juan Arquero; David García
 
 === Asignación total 
 
-Para solucionar el problema de los filósofos con *asignación total*, se ha optado por la utilización de un *único semáforo* cuyo contador solo adminirá el acceso a un proceso. 
+Para solucionar el problema de los filósofos con *asignación total*, se ha optado por la utilización de un *único semáforo* cuyo contador solo administrará el acceso a un proceso. 
 Dicho semáforo controla tanto el acceso a la USART, para que cada filósofo pueda imprimir su tarea sin interbloquear a otros, como el acceso a la tenedores.
 
-Dado que cada tenedor es un recurso que solo puede ser usado por un proceso a la vez, el semáforo también gestiona el acceso a un array de enteros compartido de 5 elementos que representa el estado de los tenedores (0 == tenedor libre; 1 == tenedor en uso). 
+Dado que cada tenedor es un recurso que solo puede ser usado por un proceso a la vez, el semáforo también gestiona el acceso a un array de enteros compartido de 5 elementos que representa el estado de los tenedores (0 == tenedor libre; 1 == tenedor en uso). El estado de los tenedores solo cambiará durante la tarea denominada comer, donde cada proceso accederá al array en exclusión mutua, cuando el semaforo le de acceso. 
+
+Los tenedores pasarán de estar libres a estar ocupados, cuando ambos estén libres, sino el proceso quedará en espera activa hasta que sus tenedores estén libres. Para liberar los tenedores se hará después de imprimir el mensaje que indica que están comiendo, por tanto el acceso a los recursos tanto para imprimir el estado de comer y modificar el estado a liberado de los tenedores es el mismo.
 
 ==== Inanición
+
+La inanición no tien lugar, dado que solo se usa un semáforo, de esta forma los procesos quedan en una cola de entrada de orden FIFO.
+
 ==== Interbloqueo
+
+El interbloqueo se resuelve, puesto que tan solo un proceso a la vez puede acceder a los recursos y hasta que este no los libere ningún otro podrá tomar el contro de los recursos (array de tenedores y acceso a la USART).
 
 === Asignación jerárquica
 
