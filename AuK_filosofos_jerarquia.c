@@ -792,50 +792,45 @@ void unblock(int task_id)
 // 1 -> tenedor ocupado (usado))
 Tsemaphore semaforos [6];
 
+void printMessage(char mensaje[]){
+    int id = give_me_my_id();
+    wait(&semaforos[5]);
+    printf("\r\n%s %d", mensaje ,id);
+    signal(&semaforos[5]);
+}
+
 void proceso(void)
 {
     while(1)
     {
-        meditar();
+        printMessage("Meditando");
         comer();
-        dormir();
+        printMessage("Durmiendo");
     }
 }
 
-
-void meditar(void)
-{
-    int id = give_me_my_id();
-    
-    wait(&semaforos[5]);
-    printf("\r\nMeditando %d", id);
-    signal(&semaforos[5]);
-    
-}
 
 void comer(void)
 {
     int id = give_me_my_id();
     
     cogerTenedor();
-    
-    wait(&semaforos[5]);
-    printf("\r\nComiendo %d", id);
-    signal(&semaforos[5]);
-    
+    printMessage("Comiendo");
     soltarTenedor();
     
 }
 
-void dormir(void)
-{
-    int id = give_me_my_id();
+int getIdTenedorB(void){
+    int myId = give_me_my_id();
+    int tenedorId;
+    if(myId == 4){
+        tenedorId = 0;
+    }else {
+        tenedorId = myId + 1;
+    }
     
-    wait(&semaforos[5]);
-    printf("\r\nDurmiendo %d", id);
-    signal(&semaforos[5]);
+    return tenedorId;
 }
-
 
 void cogerTenedor(void)
 {
@@ -851,18 +846,6 @@ void cogerTenedor(void)
         wait(&semaforos[tenedorA]);
     }
     
-}
-
-int getIdTenedorB(void){
-    int myId = give_me_my_id();
-    int tenedorId;
-    if(myId == 4){
-        tenedorId = 0;
-    }else {
-        tenedorId = myId + 1;
-    }
-    
-    return tenedorId;
 }
 
 void soltarTenedor(void)

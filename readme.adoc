@@ -29,5 +29,15 @@ El interbloqueo se resuelve, puesto que tan solo un proceso a la vez puede acced
 
 === Asignación jerárquica
 
+Para aplicar esta solución, se utiliza un total de 6 semáforos, los 5 primeros representan los tenedores y el último el acceso a la USART. Los 6 semáforos se almacenan dentro de un único array, donde la posición dentro del mismo representa el nivel jerarquico de cada recurso. 
+
+Las tareas de meditar y dormir hacen uso del semaforo con índice 5 para acceder a la USART, la tarea de comer hace uso de todos los semaforos del array. Cuando un filosofo va a comer, debe invocar la función wait del tenedor con menor índice en primer lugar, y posteriormente el de mayor prioridad. 
+
+Una vez se le haya concedido acceso a los dos semáforos, el filósofo accederá al semaforo de mayor índice, que representa la USART, para poder imprimir sin interbloqueos, posteriormente liberará todos los semáforos.
+
 ==== Inanición
+
+Con esta solución la inanición no es un problema, puesto que los recursos se asignan a un solo proceso a la vez, y quienes lo soliciten posteriormente quedan registrados en una cola FIFO.  
+
 ==== Interbloqueo
+Para evitar el interbloqueo se debe asignar prioridades a los recursos, y estos deben se accedidos de menor a mayor prioridad según se necesiten. De esta forma se asegura que ningún proceso quede a la espera de un mismo recurso de manera que se forme un interbloqueo.
